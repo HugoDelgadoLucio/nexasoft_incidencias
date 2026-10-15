@@ -14,20 +14,29 @@ class PantallaDetalle extends StatefulWidget {
 class _PantallaDetalleState extends State<PantallaDetalle> {
   bool guardando = false;
 
-  Future<void> cambiar(String? valor) async {
+  
+  Future<void> cambiar(String? valor, String tipo) async {
     if (valor == null) return;
+
     setState(() => guardando = true);
     try {
-      await widget.gestor.cambiarEstado(widget.id, valor);
+      if (tipo == 'estado') {
+        await widget.gestor.cambiarEstado(widget.id, valor);
+      } else if (tipo == 'prioridad') {
+        await widget.gestor.cambiarPrioridad(widget.id, valor);
+      }
       if (mounted) setState(() {});
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('No se pudo guardar: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('No se pudo guardar: $e')),
+        );
       }
     } finally {
       if (mounted) setState(() => guardando = false);
     }
   }
+
 
   Widget fila(String etiqueta, String valor) {
     return Padding(
@@ -75,7 +84,16 @@ class _PantallaDetalleState extends State<PantallaDetalle> {
                       items: ['Pendiente', 'En proceso', 'Resuelta']
                           .map((v) => DropdownMenuItem(value: v, child: Text(v)))
                           .toList(),
-                      onChanged: guardando ? null : cambiar,
+                      onChanged: guardando ? null : (valor) => cambiar(valor, 'estado'),
+                    ),
+                    const SizedBox(height: 30),
+                    DropdownButtonFormField<String>(
+                      value: item.prioridad,
+                      decoration: const InputDecoration(labelText: 'Prioridad de la tarea', border: OutlineInputBorder()),
+                      items: ['Baja', 'Media', 'Alta']
+                          .map((v) => DropdownMenuItem(value: v, child: Text(v)))
+                          .toList(),
+                      onChanged: guardando ? null : (valor) => cambiar(valor, 'prioridad'),
                     ),
                     if (guardando) const Padding(
                       padding: EdgeInsets.only(top: 12), child: LinearProgressIndicator(),
