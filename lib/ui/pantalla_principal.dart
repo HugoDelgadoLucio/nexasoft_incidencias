@@ -16,6 +16,11 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
   bool cargando = true;
   String? error;
   String busqueda = '';
+  String estado = 'Todos';
+  String prioridad = 'Todas';
+  String? estadoAplicado;
+  String? prioridadAplicada;
+  bool ocupado = false;
 
   @override
   void initState() {
@@ -90,7 +95,8 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
 
   @override
   Widget build(BuildContext context) {
-    final items = g.buscar(busqueda);
+    final items = g.buscar(busqueda, prioridadAplicada, estadoAplicado);
+    final hayFiltrosActivos = estadoAplicado != null || prioridadAplicada != null;
     return Scaffold(
       appBar: AppBar(
         title: const Text('NexaSoft | Incidencias'),
@@ -165,6 +171,90 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
                             ),
                             onChanged: (texto) => setState(() => busqueda = texto),
                           ),
+                        ), 
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 5),
+                                child: DropdownButtonFormField<String>(
+                                  value: estado,
+                                    items: ['Todos', 'Pendiente', 'En proceso', 'Resuelta']
+                                        .map((p) => DropdownMenuItem(
+                                              value: p,
+                                              child: Text(p),
+                                            ))
+                                        .toList(),
+                                    onChanged: ocupado
+                                        ? null
+                                        : (p) => setState(() => estado = p ?? 'Todos'),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 5),
+                                child: DropdownButtonFormField<String>(
+                                  value: prioridad,
+                                    items: ['Todas', 'Baja', 'Media', 'Alta']
+                                        .map((p) => DropdownMenuItem(
+                                              value: p,
+                                              child: Text(p),
+                                            ))
+                                        .toList(),
+                                    onChanged: ocupado
+                                        ? null
+                                        : (p) => setState(() => prioridad = p ?? 'Todas'),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 5),
+                                child: ElevatedButton(
+                                  onPressed: ocupado
+                                    ? null
+                                    : () {
+                                        setState(() {
+                                          estadoAplicado =
+                                              estado == 'Todos' ? null : estado;
+
+                                          prioridadAplicada =
+                                              prioridad == 'Todas' ? null : prioridad;
+                                        });
+                                      },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF174C83),
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  child: const Text('Aplicar filtros'),
+                                ),
+                              ),
+                            ),
+                            if (hayFiltrosActivos)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 17,
+                                  vertical: 5,
+                                ),
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: TextButton.icon(
+                                    onPressed: () {
+                                      setState(() {
+                                        estado = 'Todos';
+                                        prioridad = 'Todas';
+
+                                        estadoAplicado = null;
+                                        prioridadAplicada = null;
+                                      });
+                                    },
+                                    icon: const Icon(Icons.filter_alt_off),
+                                    label: const Text('Limpiar filtros'),
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),

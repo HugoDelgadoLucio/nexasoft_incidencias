@@ -15,7 +15,7 @@ class _PantallaNuevaState extends State<PantallaNueva> {
   final descripcion = TextEditingController();
   final cliente = TextEditingController();
   String categoria = 'Software';
-  String prioridad = "Media";
+  String prioridad = 'Media';
   bool ocupado = false;
 
   @override
